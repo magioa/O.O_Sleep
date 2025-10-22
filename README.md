@@ -5,6 +5,7 @@
 # O.O Sleep  
 *Your Sleep, Its Growth Story*
 
+*Try demo web: https://magioa.github.io/O.O_Sleep/v13.html*
 
 A calm-tech iOS application that turns **healthy sleep** into the
 **growth of an adorable AI panda**.  
@@ -28,17 +29,4 @@ Built with SwiftUI・HealthKit・Core ML・Firebase.
 | **🎉 Seasonal Events** | Join limited-time events | *Same as free* |
 | **🎧 White Noise** | Limited sounds (rain, wind …) | Unlimited white-noise & ambience |
 
-> Need the Chinese table? See below 👇
-
----
-
-## 📸 Screenshots
-
-| Pet Hub | Sleep Session | Morning Summary |
-| :---: | :---: | :---: |
-| ![](docs/assets/screen-home.png) | ![](docs/assets/screen-sleep.png) | ![](docs/assets/screen-summary.png) |
-
----
-
-## 🏗️ Project Structure
 
