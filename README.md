@@ -5,7 +5,7 @@
 # O.O Sleep  
 *Your Sleep, Its Growth Story*
 
-*Try demo web: https://magioa.github.io/O.O_Sleep/v13.html*
+*Try web demo: https://magioa.github.io/O.O_Sleep/v13.html*
 
 A calm-tech iOS application that turns **healthy sleep** into the
 **growth of adorable AI pets**.  
