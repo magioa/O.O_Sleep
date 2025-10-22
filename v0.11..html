@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O.O Sleep - UI (GitHub Pages)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Design Tokens */
+        :root {
+            --color-bg-primary: #23255A; --color-brand-purple: #6C63FF;
+            --color-soft-blue: #78A6FF; --color-cloud-blue: #9EC6FF;
+            --color-starlight-blue: #B8D1FF; --color-success: #4CD964;
+            --color-text-primary: #EDEFF7; --color-text-secondary: #B9BED5;
+            --color-text-weak: #8B90A6; --color-text-inverted: #0E0F2D;
+            --color-card-bg: #1a1c4a; --color-card-border: #3B3F7A;
+            --brand-grad: linear-gradient(180deg, #9EC6FF 0%, #6C63FF 100%);
+            --radius-card: 20px; --radius-button: 14px;
+            --shadow-card: 0 8px 24px 0 rgba(20,24,74,0.18);
+        }
+        body { font-family: 'SF Pro', 'PingFang SC', 'Noto Sans SC', sans-serif; background-color: var(--color-bg-primary); color: var(--color-text-primary); }
+        .phone-mockup { max-width: 420px; height: 880px; }
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Typography */
+        .text-h1 { font-size: 32px; line-height: 1.2; font-weight: 700; }
+        .text-h2 { font-size: 24px; line-height: 1.25; font-weight: 700; }
+        .text-title { font-size: 20px; line-height: 1.3; font-weight: 700; }
+        .text-body { font-size: 16px; line-height: 1.5; }
+        .text-caption { font-size: 13px; line-height: 1.4; color: var(--color-text-secondary); }
+        /* Components */
+        .card { background-color: var(--color-card-bg); border-radius: var(--radius-card); padding: 16px; box-shadow: var(--shadow-card); position: relative; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.15); border-radius: var(--radius-card) var(--radius-card) 0 0; }
+        .btn { height: 56px; padding: 0 20px; border-radius: var(--radius-button); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; transition: all 0.1s ease-out; }
+        .btn:active { transform: scale(0.98); filter: brightness(0.94); }
+        .btn-primary { background: var(--brand-grad); color: var(--color-text-inverted); }
+        .btn-secondary { background-color: #31336F; border: 1px solid var(--color-card-border); color: var(--color-text-primary); }
+        .ios-list { background-color: var(--color-card-bg); border-radius: 12px; }
+        .ios-list-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(139, 144, 166, 0.2); }
+        .ios-list-item:last-child { border-bottom: none; }
+        .ios-list-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 16px; }
+        .nav-item.active .nav-icon { transform: scale(1.1); color: var(--color-brand-purple); }
+        .nav-item.active .nav-label { color: var(--color-brand-purple); }
+        .modal-sheet { position: absolute; bottom: 0; left: 0; right: 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 50; background: #1E2235; backdrop-filter: blur(20px); }
+        .modal-sheet.show { transform: translateY(0); }
+        .modal-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; z-index: 40; }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .breathing-pet { animation: breathing 6s ease-in-out infinite; }
+        @keyframes breathing { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+        .tab-btn.active { background-color: var(--color-soft-blue); color: var(--color-text-inverted); }
+        .onboarding-screen { display: none; }
+        .onboarding-screen.active { display: flex; }
+        .goal-option { background-color: var(--color-card-bg); border: 2px solid var(--color-card-border); transition: all 0.2s ease; }
+        .goal-option.selected { border-color: var(--color-brand-purple); background-color: rgba(108, 99, 255, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-800 flex items-center justify-center min-h-screen p-4">
+    <div class="phone-mockup w-full rounded-[40px] border-[10px] border-gray-700 shadow-2xl overflow-hidden relative flex flex-col bg-[var(--color-bg-primary)]">
+        
+        <div id="modal-overlay" class="modal-overlay" onclick="hideAllModals()"></div>
+
+        <main class="flex-grow overflow-y-auto">
+            <!-- Onboarding Flow -->
+            <div id="onboarding-flow" class="screen active h-full">
+                <!-- Step 1: Welcome -->
+                <div id="onboarding-welcome" class="onboarding-screen active h-full p-8 text-white flex-col justify-between text-center">
+                    <div></div>
+                    <div>
+                        <img src="images/Logo.png" alt="O.O Sleep Logo" class="w-48 mx-auto rounded-[36px]">
+                        <h1 class="text-h1 mt-8">O.O Sleep</h1>
+                        <p class="text-body mt-2 text-[var(--color-text-secondary)]">Your Sleep, Its Growth Story</p>
+                    </div>
+                    <button onclick="nextOnboardingStep('onboarding-permissions')" class="btn btn-primary w-full">开启旅程</button>
+                </div>
+
+                <!-- Step 2: Permissions -->
+                <div id="onboarding-permissions" class="onboarding-screen h-full p-8 text-white flex-col justify-between text-center">
+                    <div></div>
+                    <div id="permission-mic" class="w-full">
+                        <div class="w-24 h-24 bg-purple-500/20 rounded-full mx-auto flex items-center justify-center"><i data-lucide="mic" class="w-12 h-12 text-purple-300"></i></div>
+                        <h2 class="text-h2 mt-6">麦克风权限</h2>
+                        <p class="text-body mt-2 text-[var(--color-text-secondary)]">O.O 需要麦克风来倾听你的梦话与呼噜，为你生成有趣的睡眠报告。</p>
+                    </div>
+                     <div id="permission-notify" class="w-full hidden">
+                        <div class="w-24 h-24 bg-blue-500/20 rounded-full mx-auto flex items-center justify-center"><i data-lucide="bell" class="w-12 h-12 text-blue-300"></i></div>
+                        <h2 class="text-h2 mt-6">通知权限</h2>
+                        <p class="text-body mt-2 text-[var(--color-text-secondary)]">允许我们发送睡前提醒，让 O.O 准时陪你入睡。</p>
+                    </div>
+                    <button id="permission-button" onclick="grantPermissions()" class="btn btn-primary w-full">授权</button>
+                </div>
+                
+                <!-- Step 3: Pet Selection -->
+                <div id="onboarding-pet" class="onboarding-screen h-full p-8 text-white flex-col justify-between text-center">
+                    <div></div>
+                    <div>
+                        <h2 class="text-h2">你的睡眠伙伴</h2>
+                        <img src="images/panda.jpg" alt="熊猫安安" class="w-48 my-8 mx-auto breathing-pet rounded-[36px]">
+                        <p class="text-body text-[var(--color-text-secondary)]">为你的熊猫伙伴取个名字吧</p>
+                        <input id="pet-name-input" type="text" value="安安" class="w-full text-center bg-transparent border-b-2 border-gray-500 text-h1 py-2 mt-2 focus:border-white focus:outline-none">
+                    </div>
+                    <button onclick="nextOnboardingStep('onboarding-goals')" class="btn btn-primary w-full">就叫这个！</button>
+                </div>
+
+                <!-- Step 4: Goal Setting -->
+                <div id="onboarding-goals" class="onboarding-screen h-full p-8 text-white flex-col justify-between text-left">
+                    <div class="w-full">
+                        <h2 class="text-h2 text-center">设定你的目标</h2>
+                        <p class="text-body mt-8 font-bold">你主要的睡眠困扰是？</p>
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div class="goal-option p-4 rounded-lg cursor-pointer" onclick="toggleGoal(this)"><p>入睡困难</p></div>
+                            <div class="goal-option p-4 rounded-lg cursor-pointer" onclick="toggleGoal(this)"><p>睡眠浅</p></div>
+                            <div class="goal-option p-4 rounded-lg cursor-pointer" onclick="toggleGoal(this)"><p>容易醒</p></div>
+                            <div class="goal-option p-4 rounded-lg cursor-pointer" onclick="toggleGoal(this)"><p>多梦</p></div>
+                        </div>
+                        <p class="text-body mt-8 font-bold">你的目标入睡时间是？</p>
+                        <input type="time" value="23:00" class="w-full bg-transparent text-h1 mt-2 p-2 rounded-lg border-2 border-[var(--color-card-border)]">
+                    </div>
+                    <button onclick="nextOnboardingStep('onboarding-intro')" class="btn btn-primary w-full">完成设定</button>
+                </div>
+                
+                <!-- Step 5: Core Intro -->
+                <div id="onboarding-intro" class="onboarding-screen h-full p-8 text-white flex-col justify-between text-center">
+                    <div></div>
+                    <div>
+                        <img src="images/panda.jpg" alt="可爱的熊猫睡眠App图标" class="w-48 mx-auto breathing-pet rounded-[36px]">
+                        <h1 id="intro-title" class="text-h1 mt-8">你好！我是安安</h1>
+                        <p class="text-body mt-4 text-[var(--color-text-secondary)]">通过高质量的睡眠，<br>你将获得星星，帮助我成长！</p>
+                    </div>
+                    <button onclick="finishOnboarding()" class="btn btn-primary w-full">开始使用</button>
+                </div>
+            </div>
+            
+            <!-- B. Home (宠物主页) -->
+            <div id="home" class="screen h-full p-6 text-white flex-col">
+                <div class="flex justify-between items-center relative z-10">
+                    <div class="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full"><i data-lucide="star" class="w-5 h-5 text-yellow-300 fill-yellow-400"></i><span class="font-bold text-white text-body">1,640</span></div>
+                    <div class="flex items-center gap-4"><button onclick="navigate('notifications')"><i data-lucide="bell" class="text-[var(--color-starlight-blue)]"></i></button><button onclick="navigate('settings')"><i data-lucide="settings" class="text-[var(--color-starlight-blue)]"></i></button></div>
+                </div>
+                
+                <div id="pet-display-area" class="flex-grow flex flex-col items-center justify-center text-center -mt-8 relative transition-all duration-500 rounded-3xl p-4">
+                    <div class="relative">
+                        <img src="images/panda.jpg" alt="可爱的熊猫睡眠App图标" class="w-64 breathing-pet rounded-[48px]" onclick="navigate('pet-customization')">
+                        <div id="prop-overlay-container" class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+                    </div>
+                    <h2 id="home-pet-name" class="text-h2 mt-4">安安 正在休息</h2>
+                    <button onclick="showPropsModal()" class="absolute bottom-4 left-4 bg-black/20 backdrop-blur-sm rounded-full w-12 h-12 p-0 flex items-center justify-center shadow-lg hover:bg-black/40 transition-colors">
+                        <i data-lucide="shirt" class="w-6 h-6 text-white"></i>
+                    </button>
+                    <button onclick="showBackgroundModal()" class="absolute bottom-4 right-4 bg-black/20 backdrop-blur-sm rounded-full w-12 h-12 p-0 flex items-center justify-center shadow-lg hover:bg-black/40 transition-colors">
+                        <i data-lucide="image" class="w-6 h-6 text-white"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-3 mt-4">
+                     <div class="card w-full p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #f97316 0%, #4f46e5 100%);" onclick="navigate('store')">
+                        <div class="relative z-10">
+                            <h3 class="text-title font-bold text-white">万圣节限定装扮</h3>
+                            <p class="text-caption text-white/80">点击查看 O.O 的新衣服！</p>
+                        </div>
+                        <i data-lucide="ghost" class="absolute -right-4 -bottom-6 w-28 h-28 text-black/20 opacity-70 rotate-[-15deg]"></i>
+                    </div>
+                    <button onclick="showSleepModal()" class="btn btn-primary w-full"><i data-lucide="power" class="mr-2"></i>开始睡眠</button>
+                </div>
+            </div>
+            
+            <!-- Other screens remain here... -->
+             <div id="sleep" class="screen h-full p-6 text-white flex-col overflow-y-auto space-y-6">
+                <h1 class="text-h2">睡眠中心</h1>
+                <div><div class="flex justify-between items-center mb-3"><h2 class="text-title">睡眠日历</h2><div class="flex items-center gap-3 text-caption"><span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-[var(--color-brand-purple)]"></div>优秀</span><span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-[var(--color-soft-blue)]"></div>良好</span><span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-gray-500"></div>一般</span></div></div><div class="card p-4"><div class="flex justify-between items-center mb-3"><i data-lucide="chevron-left" class="text-[var(--color-text-weak)]"></i><p class="font-bold">2025年 10月</p><i data-lucide="chevron-right" class="text-[var(--color-text-weak)]"></i></div><div id="calendar-grid" class="grid grid-cols-7 gap-y-2 text-center text-sm"></div></div></div>
+                <div><h2 class="text-title mb-3">白噪音</h2><div id="noise-options-container" class="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6"><div data-noise-id="none" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-transparent"><i data-lucide="volume-x" class="w-8 h-8 text-gray-400"></i><p class="mt-2 text-sm font-bold">无</p></div><div data-noise-id="rain" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-[var(--color-brand-purple)]"><i data-lucide="cloud-rain" class="w-8 h-8 text-blue-300"></i><p class="mt-2 text-sm font-bold">雨夜</p></div><div data-noise-id="wind" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-transparent"><i data-lucide="wind" class="w-8 h-8 text-gray-300"></i><p class="mt-2 text-sm">风声</p></div><div data-noise-id="waves" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-transparent"><i data-lucide="waves" class="w-8 h-8 text-cyan-300"></i><p class="mt-2 text-sm">海浪</p></div><div data-noise-id="fire" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-transparent"><i data-lucide="flame" class="w-8 h-8 text-orange-300"></i><p class="mt-2 text-sm">篝火</p></div><div data-noise-id="train" class="noise-option cursor-pointer flex-shrink-0 card text-center p-4 w-24 h-24 flex flex-col justify-center items-center border-2 border-transparent"><i data-lucide="train-track" class="w-8 h-8 text-gray-400"></i><p class="mt-2 text-sm">列车</p></div></div></div>
+                <div class="card" onclick="navigate('routine-planner')"><div class="flex items-center"><div class="ios-list-icon bg-purple-500"><i data-lucide="calendar-clock"></i></div><div><p class="text-body font-bold">作息管理</p><p class="text-caption">O.O 的专属动画提醒</p></div><i data-lucide="chevron-right" class="ml-auto text-[var(--color-text-weak)]"></i></div></div>
+            </div>
+             <div id="competing" class="screen h-full p-6 text-white flex-col"><div class="flex justify-between items-center mb-6"><h1 class="text-h2">睡眠竞赛</h1><button onclick="navigate('badge-gallery')"><i data-lucide="award" class="text-[var(--color-starlight-blue)] w-6 h-6"></i></button></div><div class="flex bg-black/20 p-1 rounded-lg mb-4" id="leaderboard-tabs"><button class="tab-btn active flex-1 p-2 rounded-md text-sm font-bold">好友</button><button class="tab-btn flex-1 p-2 rounded-md text-sm font-bold">全球</button></div><div class="card p-4 space-y-3"><div class="flex items-center gap-4"><span class="text-xl w-6 text-center">🥇</span><img src="https://placehold.co/40x40/FBBF24/0E0F2D?text=🐱" alt="Alice的宠物" class="w-10 h-10 rounded-full"><p class="text-body font-bold flex-grow">Alice</p><p class="text-lg font-semibold">95分</p></div><div class="flex items-center gap-4"><span class="text-xl w-6 text-center">🥈</span><img src="images/panda.jpg" alt="你的熊猫宠物" class="w-10 h-10 rounded-full object-cover bg-white/10 p-0.5"><p class="text-body font-bold flex-grow">你</p><p class="text-lg font-semibold">88分</p></div><div class="flex items-center gap-4"><span class="text-xl w-6 text-center">🥉</span><img src="https://placehold.co/40x40/F87171/0E0F2D?text=🦊" alt="Bob的宠物" class="w-10 h-10 rounded-full"><p class="text-body font-bold flex-grow">Bob</p><p class="text-lg font-semibold">85分</p></div></div><div class="card mt-6 p-4 text-center"><h3 class="text-title">好友组队睡眠</h3><p class="text-caption mt-1 mb-4">邀请好友一起完成目标，赢取额外奖励！</p><button class="btn btn-secondary w-full"><i data-lucide="users" class="mr-2"></i>创建队伍</button></div></div>
+
+        </main>
+
+        <nav class="w-full bg-black/30 backdrop-blur-md border-t border-white/10 flex justify-around p-2">
+            <button class="nav-item active flex-1 flex flex-col items-center justify-center p-1" onclick="navigate('home', this)"><i data-lucide="tent" class="nav-icon w-7 h-7 text-[var(--color-text-weak)]"></i><span class="nav-label text-xs text-[var(--color-text-weak)] mt-1">主页</span></button>
+            <button class="nav-item flex-1 flex flex-col items-center justify-center p-1" onclick="navigate('sleep', this)"><i data-lucide="bed-double" class="nav-icon w-7 h-7 text-[var(--color-text-weak)]"></i><span class="nav-label text-xs text-[var(--color-text-weak)] mt-1">睡眠</span></button>
+            <button class="nav-item flex-1 flex flex-col items-center justify-center p-1" onclick="navigate('competing', this)"><i data-lucide="trophy" class="nav-icon w-7 h-7 text-[var(--color-text-weak)]"></i><span class="nav-label text-xs text-[var(--color-text-weak)] mt-1">竞赛</span></button>
+        </nav>
+
+        <!-- Modals -->
+        <div id="sleep-modal" class="modal-sheet rounded-t-3xl p-6 text-white flex-col">
+            <div class="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div><h2 id="modal-title" class="text-h2 text-center mb-6">准备入睡</h2>
+            <div class="text-center my-auto"><p id="modal-countdown" class="text-h1" style="font-size: 80px;"></p><p id="modal-text" class="text-caption">将为你播放白噪音「雨夜」</p></div>
+            <button onclick="startSleepNow()" class="btn btn-primary w-full mt-auto">立即开始</button><button onclick="hideSleepModal()" class="btn btn-secondary w-full mt-2">取消</button>
+        </div>
+        <div id="background-modal" class="modal-sheet rounded-t-3xl p-6 text-white flex-col">
+             <div class="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div><h2 class="text-h2 text-center mb-6">更换场景</h2>
+             <div id="scene-options-container" class="grid grid-cols-2 gap-4 overflow-y-auto"></div>
+        </div>
+        <div id="props-modal" class="modal-sheet rounded-t-3xl p-6 text-white flex-col">
+             <div class="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div><h2 class="text-h2 text-center mb-6">道具与装扮</h2>
+             <div id="prop-options-container" class="grid grid-cols-3 gap-4 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let sleepInterval, modalCountdownInterval, heartRateInterval;
+        const navigationStack = ['onboarding-flow']; // Start with the flow
+        let currentPermissionStep = 'mic';
+        
+        function nextOnboardingStep(nextStepId) {
+            if (nextStepId === 'onboarding-intro') {
+                const petName = document.getElementById('pet-name-input').value || '安安';
+                document.getElementById('intro-title').textContent = `你好！我是${petName}`;
+                document.getElementById('home-pet-name').textContent = `${petName} 正在休息`;
+            }
+            document.querySelectorAll('.onboarding-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(nextStepId).classList.add('active');
+        }
+
+        function grantPermissions() {
+            if (currentPermissionStep === 'mic') {
+                // Simulate granting mic permission
+                document.getElementById('permission-mic').classList.add('hidden');
+                document.getElementById('permission-notify').classList.remove('hidden');
+                currentPermissionStep = 'notify';
+            } else {
+                // Simulate granting notification permission and move to next step
+                nextOnboardingStep('onboarding-pet');
+            }
+        }
+        
+        function toggleGoal(element) {
+            element.classList.toggle('selected');
+        }
+
+        function finishOnboarding() {
+            document.getElementById('onboarding-flow').classList.remove('active');
+            navigate('home', document.querySelector('.nav-item'));
+        }
+
+        const scenes = [
+            { id: 'night_sky', name: '静谧夜空', style: 'var(--color-bg-primary)', noiseId: 'none' },
+            { id: 'dusk', name: '薄暮森林', style: 'linear-gradient(to top, #4338ca, #312e81)', noiseId: 'rain' },
+            { id: 'twilight', name: '深邃暮光', style: 'linear-gradient(to top, #1e3a8a, #4c1d95)', noiseId: 'wind' },
+            { id: 'aurora', name: '极光之境', style: 'linear-gradient(to top, #0c4a6e, #7e22ce)', noiseId: 'waves' }
+        ];
+
+        const props = [
+            { id: 'none', name: '无', icon: 'slash' },
+            { id: 'hat', name: '派对帽', imageUrl: 'https://placehold.co/80x80/ffffff/000000/png?text=%F0%9F%8E%89', style: 'position: absolute; top: 15%; left: 50%; width: 30%; transform: translateX(-50%) rotate(-15deg);' },
+            { id: 'glasses', name: '太阳镜', imageUrl: 'https://placehold.co/120x40/ffffff/000000/png?text=%F0%9F%98%8E', style: 'position: absolute; top: 40%; left: 50%; width: 45%; transform: translateX(-50%);' }
+        ];
+
+        function populateScenes() {
+            const container = document.getElementById('scene-options-container');
+            if (!container) return;
+            container.innerHTML = '';
+            scenes.forEach(scene => {
+                const sceneEl = document.createElement('div');
+                sceneEl.className = 'text-center cursor-pointer';
+                sceneEl.onclick = () => selectScene(scene.id);
+                sceneEl.innerHTML = `<div class="w-full h-24 rounded-lg mb-2" style="background: ${scene.style};"></div><p class="text-body font-bold">${scene.name}</p>`;
+                container.appendChild(sceneEl);
+            });
+        }
+        
+        function populateProps() {
+            const container = document.getElementById('prop-options-container');
+            if (!container) return;
+            container.innerHTML = '';
+            props.forEach(prop => {
+                const propEl = document.createElement('div');
+                propEl.className = 'text-center cursor-pointer card !p-2';
+                propEl.onclick = () => selectProp(prop.id);
+                let iconHtml = prop.imageUrl ? `<img src="${prop.imageUrl}" class="w-16 h-16 mx-auto object-contain">` : `<div class="w-16 h-16 mx-auto flex items-center justify-center"><i data-lucide="${prop.icon}" class="w-8 h-8 text-gray-400"></i></div>`;
+                propEl.innerHTML = `${iconHtml}<p class="text-caption mt-1">${prop.name}</p>`;
+                container.appendChild(propEl);
+            });
+            lucide.createIcons();
+        }
+
+        function selectScene(sceneId) {
+            const scene = scenes.find(s => s.id === sceneId);
+            if (!scene) return;
+            document.getElementById('pet-display-area').style.background = scene.style;
+            const noiseOption = document.querySelector(`.noise-option[data-noise-id="${scene.noiseId}"]`);
+            if (noiseOption) {
+                 document.querySelectorAll('.noise-option').forEach(option => option.classList.remove('border-[var(--color-brand-purple)]').add('border-transparent'));
+                noiseOption.classList.add('border-[var(--color-brand-purple)]').remove('border-transparent');
+            }
+            hideBackgroundModal();
+        }
+
+        function selectProp(propId) {
+            const prop = props.find(p => p.id === propId);
+            if (!prop) return;
+            const container = document.getElementById('prop-overlay-container');
+            container.innerHTML = (prop.id !== 'none') ? `<img src="${prop.imageUrl}" style="${prop.style}">` : '';
+            hidePropsModal();
+        }
+
+        function showBackgroundModal() { document.getElementById('modal-overlay').classList.add('show'); document.getElementById('background-modal').classList.add('show'); }
+        function hideBackgroundModal() { document.getElementById('modal-overlay').classList.remove('show'); document.getElementById('background-modal').classList.remove('show'); }
+        function showPropsModal() { document.getElementById('modal-overlay').classList.add('show'); document.getElementById('props-modal').classList.add('show'); }
+        function hidePropsModal() { document.getElementById('modal-overlay').classList.remove('show'); document.getElementById('props-modal').classList.remove('show'); }
+
+        function navigate(screenId, navElement) {
+            const currentScreen = navigationStack[navigationStack.length - 1];
+            if (screenId === currentScreen && navElement) return; 
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if (navElement) {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                navElement.classList.add('active');
+                navigationStack = [screenId];
+            } else if (navigationStack[navigationStack.length - 1] !== screenId) {
+                navigationStack.push(screenId);
+            }
+        }
+
+        function goBack() {
+            if (navigationStack.length <= 1) return;
+            navigationStack.pop();
+            const previousScreen = navigationStack[navigationStack.length - 1];
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(previousScreen).classList.add('active');
+        }
+        
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            if (!calendarGrid) return;
+            calendarGrid.innerHTML = '';
+            const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+            daysOfWeek.forEach(day => { calendarGrid.insertAdjacentHTML('beforeend', `<div class="text-center text-caption font-bold">${day}</div>`); });
+            const firstDayOffset = 3; 
+            for (let i = 0; i < firstDayOffset; i++) { calendarGrid.insertAdjacentHTML('beforeend', '<div></div>'); }
+            const today = 22;
+            const daysInMonth = 31;
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dayClass = 'relative h-8 w-8 flex items-center justify-center mx-auto rounded-full';
+                if (day < today) {
+                    const sleepScore = 50 + Math.random() * 50;
+                    if (sleepScore >= 90) dayClass += ' border-2 border-[var(--color-brand-purple)]';
+                    else if (sleepScore >= 75) dayClass += ' border-2 border-[var(--color-soft-blue)]';
+                    else dayClass += ' border-2 border-gray-500';
+                }
+                if (day === today) dayClass += ' bg-[var(--color-brand-purple)] text-white font-bold';
+                calendarGrid.insertAdjacentHTML('beforeend', `<div class="${dayClass}">${day}</div>`);
+            }
+        }
+        
+        function showSleepModal() { document.getElementById('modal-overlay').classList.add('show'); document.getElementById('sleep-modal').classList.add('show'); let countdown = 5; document.getElementById('modal-countdown').textContent = countdown; modalCountdownInterval = setInterval(() => { countdown--; document.getElementById('modal-countdown').textContent = countdown; if (countdown === 0) startSleepNow(); }, 1000); }
+        function hideSleepModal() { document.getElementById('modal-overlay').classList.remove('show'); document.getElementById('sleep-modal').classList.remove('show'); }
+        function hideAllModals() { hideSleepModal(); hideBackgroundModal(); hidePropsModal(); }
+        
+        function startSleepNow() {
+            clearInterval(modalCountdownInterval);
+            hideSleepModal();
+            navigate('in-sleep');
+            let secondsSlept = 0;
+            const timerDisplay = document.getElementById('sleep-timer');
+            sleepInterval = setInterval(() => {
+                secondsSlept++;
+                const h = String(Math.floor(secondsSlept / 3600)).padStart(2, '0');
+                const m = String(Math.floor((secondsSlept % 3600) / 60)).padStart(2, '0');
+                const s = String(secondsSlept % 60).padStart(2, '0');
+                timerDisplay.textContent = `${h}:${m}:${s}`;
+                if (secondsSlept > 5) { endSleep(); }
+            }, 1000);
+            heartRateInterval = setInterval(() => {
+                document.getElementById('user-heart-rate').textContent = Math.floor(60 + Math.random() * 10);
+                document.getElementById('pet-heart-rate').textContent = Math.floor(65 + Math.random() * 10);
+            }, 2000);
+        }
+
+        function endSleep() {
+            clearInterval(sleepInterval);
+            clearInterval(heartRateInterval);
+            navigate('morning-summary');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { 
+            document.getElementById('onboarding-flow').classList.add('active'); // Start with onboarding flow
+            generateCalendar();
+            populateScenes();
+            populateProps();
+            
+            // Other initializations...
+        });
+    </script>
+</body>
+</html>
+
