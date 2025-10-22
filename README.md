@@ -30,3 +30,7 @@ Built with SwiftUI・HealthKit・Core ML・Firebase.
 | **🎧 White Noise** | Limited sounds (rain, wind …) | Unlimited white-noise & ambience |
 
 
+## 🤝 Contributing
+
+> **We welcome your valuable feedback and suggestions!**  
+> Feel free to open an issue or submit a pull request.
