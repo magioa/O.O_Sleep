@@ -8,7 +8,7 @@
 *Try demo web: https://magioa.github.io/O.O_Sleep/v13.html*
 
 A calm-tech iOS application that turns **healthy sleep** into the
-**growth of an adorable AI panda**.  
+**growth of adorable AI pets**.  
 Built with SwiftUI・HealthKit・Core ML・Firebase.
 
 </div>
